@@ -40,7 +40,7 @@ proxies:
     server: wangyuankan.wang
     port: 443
     username: ykwang090810
-    password: Ykwang090810
+    password: XXX
     tls: false
 
   # 变体 B：TLS 加密的 HTTP 代理（HTTPS 代理）
@@ -49,7 +49,7 @@ proxies:
     server: wangyuankan.wang
     port: 443
     username: ykwang090810
-    password: Ykwang090810
+    password: XXX
     tls: true
     skip-cert-verify: true   # 自签证书时需要；正式证书可改 false
 
@@ -61,8 +61,8 @@ proxy-groups:
   - name: "PROXY"
     type: select
     proxies:
-      - "travelingweb-HTTP"
-      - "travelingweb-HTTPS"
+      - "wangyuankan-HTTP"
+      - "wangyuankan-HTTPS"
 
 # -----------------------------------------------------------
 # 全局模式下 rules 基本不参与匹配，仅保留本地网段直连以防自身回环
