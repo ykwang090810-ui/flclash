@@ -1,0 +1,28 @@
+# FlClash 配置文件
+
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+external-controller: 127.0.0.1:9090
+
+proxies:
+  - name: "wangyuankan-proxy"
+    type: http
+    server: wangyuankan.wang
+    port: 443
+    username: ykwang090810
+    password: Ykwang090810
+    tls: true
+    skip-cert-verify: false
+
+proxy-groups:
+  - name: "Proxy"
+    type: select
+    proxies:
+      - wangyuankan-proxy
+      - DIRECT
+
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
