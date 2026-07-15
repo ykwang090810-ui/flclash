@@ -1,28 +1,72 @@
-# FlClash 配置文件
+# ===========================================================
+# FlClash (Android) 配置 —— travelingweb.xyz 全局代理
+# 开启后：所有流量都走代理（全局模式，不做域名过滤）
+#
+# 说明：travelingweb.xyz:443 的真实类型（明文HTTP 还是 TLS加密HTTPS）尚未确定，
+#      因此放了两个节点变体，导入后在 FlClash 里分别测速：
+#        - travelingweb-HTTP   （明文 HTTP 代理，最常见，先试这个）
+#        - travelingweb-HTTPS  （TLS 加密 HTTP 代理，tls: true）
+#      哪个能连通就在 PROXY 组里选哪个。
+# ===========================================================
 
 mixed-port: 7890
 allow-lan: false
-mode: rule
+mode: global          # 全局模式：所有流量走 GLOBAL 组选中的节点
 log-level: info
-external-controller: "127.0.0.1:9090"
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
 
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - https://doh.pub/dns-query
+  fallback:
+    - 8.8.8.8
+    - 1.1.1.1
+
+# -----------------------------------------------------------
+# 代理节点：同一服务器的两种类型变体
+# -----------------------------------------------------------
 proxies:
-  - name: "wangyuankan-proxy"
+  # 变体 A：明文 HTTP 代理（放在 443 端口做伪装，最常见，优先试）
+  - name: "travelingweb-HTTP"
     type: http
-    server: "wangyuankan.wang"
+    server: wangyuankan.wang
     port: 443
-    username: "ykwang090810"
-    password: "Ykwang090810"
-    tls: true
-    skip-cert-verify: false
+    username: ykwang090810
+    password: Ykwang090810
+    tls: false
 
+  # 变体 B：TLS 加密的 HTTP 代理（HTTPS 代理）
+  - name: "wangyuankan-HTTPS"
+    type: http
+    server: wangyuankan.wang
+    port: 443
+    username: ykwang090810
+    password: Ykwang090810
+    tls: true
+    skip-cert-verify: true   # 自签证书时需要；正式证书可改 false
+
+# -----------------------------------------------------------
+# 策略组：全局模式下所有流量走这里选中的节点
+# 默认选 HTTP 变体；连不通就在 FlClash 里手动切到 HTTPS
+# -----------------------------------------------------------
 proxy-groups:
-  - name: "Proxy"
+  - name: "PROXY"
     type: select
     proxies:
-      - "wangyuankan-proxy"
-      - "DIRECT"
+      - "travelingweb-HTTP"
+      - "travelingweb-HTTPS"
 
+# -----------------------------------------------------------
+# 全局模式下 rules 基本不参与匹配，仅保留本地网段直连以防自身回环
+# -----------------------------------------------------------
 rules:
-  - "GEOIP,CN,DIRECT"
-  - "MATCH,Proxy"
+  - GEOIP,LAN,DIRECT,no-resolve
+  - MATCH,PROXY
